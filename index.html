@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tini | Últimas noticias</title>
+<meta name="description" content="Las últimas noticias de Tini Stoessel, actualizadas automáticamente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,800&family=Silkscreen&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ COLORES (si querés cambiar la paleta, es acá) ============ */
+  :root {
+    --noche: #050d1f;
+    --azul-profundo: #0a1f44;
+    --celeste: #7fd6ff;
+    --cian: #22d3ee;
+    --lila: #7b7fe0;
+    --purpura: #a64dff;
+    --magenta: #e040c8;
+    --hielo: #eef6ff;
+    --texto: #eaf4ff;
+    --texto-suave: #9db6d3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--texto);
+    background:
+      radial-gradient(120% 70% at 50% 0%, #3b7fb8 0%, rgba(59,127,184,0) 60%),
+      radial-gradient(90% 60% at 80% 40%, rgba(34,211,238,.18) 0%, rgba(34,211,238,0) 70%),
+      radial-gradient(80% 50% at 10% 100%, rgba(166,77,255,.28) 0%, rgba(166,77,255,0) 70%),
+      linear-gradient(180deg, var(--azul-profundo) 0%, var(--noche) 70%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  /* Las estrellas van detrás de todo (z-index negativo). El contenido NO lleva z-index:
+     así el logo puede mezclarse con el cielo y su fondo negro desaparece. */
+  #estrellas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+  .contenido { position: relative; }
+
+  /* ============ MENÚ ============ */
+  .menu {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px clamp(16px, 4vw, 40px);
+    font-weight: 800; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .menu .suave { color: var(--texto-suave); font-weight: 600; }
+
+  /* ============ LETRAS ============ */
+  .pixel {
+    font-family: "Silkscreen", monospace;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(234,244,255,.8);
+    text-shadow: 0 0 8px rgba(127,214,255,.5);
+  }
+
+  /* ============ PORTADA ============ */
+  .portada {
+    text-align: center; position: relative;
+    padding: clamp(10px, 3vw, 30px) 16px clamp(28px, 5vw, 56px);
+  }
+
+  /* El logo viene con fondo negro; "screen" hace que el negro desaparezca sobre el cielo */
+  /* El resplandor es un círculo difuso detrás del logo (el logo en sí es cuadrado) */
+  .logo-caja { position: relative; width: clamp(180px, 34vw, 400px); margin: 0 auto calc(clamp(180px, 34vw, 400px) * -.2); }
+
+  /* Texto que no se ve pero lo leen los lectores de pantalla y Google */
+  .solo-lectores {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+  .logo-caja::before {
+    content: ""; position: absolute; inset: -22%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(127,214,255,.5), rgba(127,214,255,0));
+  }
+  .logo {
+    position: relative; display: block; width: 100%; height: auto;
+    mix-blend-mode: screen;
+    filter: contrast(1.18);
+    animation: flotar 8s ease-in-out infinite;
+  }
+
+  /* Título cromado, alto y angosto como el de la gira */
+  .titulo-cromo {
+    display: inline-block;
+    font-family: "Bodoni Moda", serif;
+    font-weight: 800;
+    font-size: clamp(3.6rem, 14vw, 10.5rem);
+    line-height: .9;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg,
+      #ffffff 0%, #dfe7f3 22%, #8d99ae 42%, #1f2a3d 50%,
+      #c9d6ea 56%, #ffffff 72%, #9fb0c9 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,.5);
+    filter: drop-shadow(0 0 20px rgba(127,214,255,.5)) drop-shadow(0 6px 12px rgba(0,0,0,.45));
+    transform: scale(.8, 1.3);
+    transform-origin: center top;
+    margin: clamp(0px, 1vw, 10px) 0 clamp(26px, 4vw, 44px);
+  }
+  .bajada { font-size: clamp(.7rem, 1.8vw, .95rem); margin-top: 26px; }
+
+  .luna {
+    position: absolute; top: 2%; right: clamp(-30px, 5vw, 80px);
+    width: clamp(90px, 16vw, 210px); height: auto;
+    filter: drop-shadow(0 0 24px rgba(166,77,255,.7));
+    animation: flotar 9s ease-in-out infinite; pointer-events: none;
+  }
+  .flotantes { position: absolute; inset: 0; pointer-events: none; }
+  .flotantes .pixel { position: absolute; font-size: .7rem; opacity: .7; animation: flotar 7s ease-in-out infinite; }
+  .flotantes .f1 { top: 14%; left: 7%; }
+  .flotantes .f2 { top: 26%; right: 5%; animation-delay: -2s; }
+  .flotantes .f3 { top: 52%; left: 10%; animation-delay: -4s; }
+  @keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+
+  /* ============ PRIMERA PANTALLA ============ */
+  /* Ocupa todo el alto de la pantalla, así las noticias empiezan recién al bajar */
+  .arriba { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
+  .arriba .menu, .arriba .bajar, .arriba .bajada { position: relative; }
+  /* La portada no es "relativa" acá: así la luna y los cartelitos se ubican respecto de TODA la
+     pantalla y no solo de la columna izquierda */
+  .arriba .portada { position: static; }
+  .arriba .bajada { font-size: clamp(.62rem, 1.1vw, .8rem); }
+
+  /* En compu: el logo y la frase quedan a la izquierda, para no taparle la cara a Tini */
+  .arriba .portada {
+    flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    width: min(44%, 620px); margin-left: clamp(16px, 5vw, 100px);
+  }
+
+  /* Foto de fondo a pantalla completa, semitransparente. Se funde con el cielo
+     hacia la izquierda (donde va el logo) y hacia abajo (donde empiezan las noticias). */
+  .fondo-foto {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 56% center;
+    opacity: .85; pointer-events: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 34%), linear-gradient(to bottom, #000 62%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 34%), linear-gradient(to bottom, #000 62%, transparent 100%);
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+  }
+  .bajar {
+    align-self: center; margin: 0 0 24px; font-size: .7rem; text-decoration: none;
+    animation: flotar 3s ease-in-out infinite;
+  }
+  .bajar:hover { color: #fff; }
+
+  /* En celular: Tini arriba y el logo abajo, sin taparle la cara */
+  @media (max-width: 800px) {
+    .arriba .portada { width: auto; margin-left: 0; justify-content: flex-end; padding-bottom: 12px; }
+    .luna { top: 70px; right: 14px; width: 64px; }
+    .fondo-foto {
+      object-position: 55% 30%; opacity: .8;
+      -webkit-mask-image: linear-gradient(to bottom, #000 38%, transparent 82%);
+      mask-image: linear-gradient(to bottom, #000 38%, transparent 82%);
+      -webkit-mask-composite: source-over; mask-composite: add;
+    }
+  }
+
+  /* ============ NOTICIAS ============ */
+  .zona { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px) 80px; }
+
+  .estado {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px; margin: 0 4px 22px; font-size: .75rem;
+  }
+  .punto {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--cian); box-shadow: 0 0 10px var(--cian);
+    margin-right: 8px; animation: latido 2s ease-in-out infinite;
+  }
+  @keyframes latido { 50% { opacity: .35; } }
+
+  .grilla {
+    display: grid; gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+  }
+
+  /* TARJETA: la foto entera arriba, en un marco, y un panel de vidrio con el texto abajo.
+     El texto nunca tapa la foto. */
+  .tarjeta {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.09);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 18px 44px rgba(0,0,0,.45), 0 0 26px rgba(166,77,255,.22);
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    animation: entrar .6s ease both;
+  }
+  .tarjeta:hover, .tarjeta:focus-visible {
+    transform: translateY(-6px);
+    border-color: rgba(224,64,200,.9);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 24px 54px rgba(0,0,0,.5), 0 0 46px rgba(224,64,200,.5);
+    outline: none;
+  }
+  @keyframes entrar { from { opacity: 0; transform: translateY(18px); } }
+
+  /* El marco de la foto */
+  .cuadro-foto {
+    position: relative; overflow: hidden;
+    aspect-ratio: 16 / 10; margin: 10px 10px 0; border-radius: 20px;
+    background: linear-gradient(160deg, rgba(123,127,224,.35), rgba(10,31,68,.9));
+  }
+  .tarjeta .foto {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center 22%;
+    transition: transform .6s ease;
+  }
+  .tarjeta:hover .foto { transform: scale(1.05); }
+
+  /* Sin foto: queda el vidrio con el logo de marca de agua */
+  .tarjeta .marca {
+    position: absolute; top: 50%; left: 50%; width: 34%; max-width: 150px;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen; opacity: .4;
+  }
+
+  /* El texto, debajo de la foto */
+  .vidrio { flex: 1; display: flex; flex-direction: column; padding: 16px 20px 18px; }
+  .vidrio .fuente { font-size: .68rem; color: var(--celeste); }
+  .vidrio h2 {
+    font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.3; font-weight: 800;
+    margin: 8px 0 10px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .vidrio .pie { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .66rem; }
+  .boton {
+    padding: 8px 14px; border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,.7);
+    font-family: "Silkscreen", monospace; text-transform: uppercase; letter-spacing: .1em;
+    font-size: .66rem; white-space: nowrap; transition: background .2s, color .2s;
+  }
+  .tarjeta:hover .boton { background: #fff; color: var(--noche); }
+
+  /* La noticia más nueva ocupa todo el ancho: foto grande a un lado y texto al otro */
+  .tarjeta.destacada { grid-column: 1 / -1; flex-direction: row; }
+  .tarjeta.destacada .cuadro-foto { flex: 1.4; aspect-ratio: auto; min-height: 340px; margin: 12px; }
+  .tarjeta.destacada .vidrio { flex: 1; justify-content: center; padding: clamp(20px, 3vw, 34px); }
+  .tarjeta.destacada h2 { font-size: clamp(1.3rem, 2.8vw, 2rem); -webkit-line-clamp: 5; }
+  .tarjeta.destacada .pie { margin-top: 22px; }
+  @media (max-width: 760px) {
+    .tarjeta.destacada { flex-direction: column; }
+    .tarjeta.destacada .cuadro-foto { flex: none; aspect-ratio: 16 / 10; min-height: 0; margin: 10px 10px 0; }
+    .tarjeta.destacada .vidrio { justify-content: flex-start; }
+  }
+
+  .mensaje {
+    grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+    border: 1px solid rgba(255,255,255,.3); border-radius: 30px;
+    background: rgba(255,255,255,.08); backdrop-filter: blur(14px);
+    color: var(--texto-suave);
+  }
+
+  /* ============ FILTROS, BOTÓN Y CARTELITO "NUEVA" ============ */
+  .acciones { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .vivo { display: inline-flex; align-items: center; font-size: .7rem; }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 4px 24px; }
+  .chip {
+    cursor: pointer; padding: 9px 16px; border-radius: 999px;
+    font-size: .68rem; color: var(--texto);
+    background: rgba(255,255,255,.1);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.3);
+    transition: background .2s, border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .chip:hover { border-color: var(--magenta); box-shadow: 0 0 18px rgba(224,64,200,.45); }
+  .chip:focus-visible { outline: 2px solid var(--celeste); outline-offset: 2px; }
+  .chip[aria-pressed="true"] {
+    background: linear-gradient(135deg, rgba(224,64,200,.55), rgba(166,77,255,.45));
+    border-color: rgba(255,255,255,.7);
+    box-shadow: 0 0 20px rgba(224,64,200,.5);
+  }
+  .chip:disabled { opacity: .6; cursor: progress; }
+
+  .etiqueta-nueva {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    padding: 6px 12px; border-radius: 999px; font-size: .64rem;
+    color: #fff; background: var(--magenta);
+    box-shadow: 0 0 18px rgba(224,64,200,.8);
+    text-shadow: none;
+  }
+  .tarjeta.sin-anim { animation: none; }
+
+  .vidrio .resumen {
+    font-size: .85rem; line-height: 1.45; color: rgba(234,244,255,.85);
+    margin: -4px 0 14px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .tarjeta.destacada .vidrio .resumen { -webkit-line-clamp: 3; font-size: .95rem; }
+
+  footer { text-align: center; padding: 30px 16px 50px; font-size: .66rem; color: var(--texto-suave); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  @media (max-width: 600px) {
+    .flotantes .f3 { display: none; }
+    .menu .suave { display: none; }
+  }
+</style>
+</head>
+
+<body>
+<canvas id="estrellas" aria-hidden="true"></canvas>
+
+<div class="contenido">
+  <div class="arriba">
+    <img class="fondo-foto" src="assets/fondo-hero.jpg" alt="">
+  <nav class="menu">
+    <span>Tini · Noticias</span>
+    <span class="vivo pixel"><span class="punto"></span>En vivo</span>
+  </nav>
+
+  <header class="portada">
+    <svg class="luna" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="glitter" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d9a8ff"/>
+          <stop offset=".5" stop-color="#a64dff"/>
+          <stop offset="1" stop-color="#5b1fb0"/>
+        </linearGradient>
+      </defs>
+      <path d="M150 100a60 60 0 1 1-36-55 48 48 0 1 0 36 55z" fill="url(#glitter)"/>
+      <polygon points="42,48 50,70 74,70 55,84 62,106 42,92 22,106 29,84 10,70 34,70" fill="url(#glitter)"/>
+    </svg>
+    <div class="flotantes" aria-hidden="true">
+      <span class="pixel f1">Todas las noticias</span>
+      <span class="pixel f2">Todo actualizado</span>
+      <span class="pixel f3">Lo último</span>
+    </div>
+    <div class="logo-caja"><img class="logo" src="assets/logo-t.png" alt="Logo de Tini"></div>
+    <h1 class="solo-lectores">Tini · Noticias</h1>
+    <p class="pixel bajada">Todo lo último de Tini · se actualiza cada 2 horas</p>
+  </header>
+  <a class="bajar pixel" href="#noticias">Ver noticias ↓</a>
+  </div>
+
+  <main class="zona" id="noticias">
+    <div class="estado pixel">
+      <span><span class="punto"></span><span id="estado-texto">Buscando noticias…</span></span>
+      <span class="acciones">
+        <span id="estado-hora"></span>
+        <button type="button" id="btn-actualizar" class="chip pixel">Actualizar ahora</button>
+      </span>
+    </div>
+    <div class="chips" id="chips" aria-label="Filtrar noticias"></div>
+    <section class="grilla" id="grilla" aria-live="polite">
+      <div class="mensaje pixel">Cargando noticias…</div>
+    </section>
+  </main>
+
+  <footer class="pixel">
+    Proyecto Noticias TTT · Las notas y fotos pertenecen a sus medios de origen.
+  </footer>
+</div>
+
+<script>
+  // ============ 1) DE DÓNDE SALEN LAS NOTICIAS ============
+  // Link de la hoja de Google publicada como CSV. n8n la llena cada 2 horas.
+  const URL_HOJA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRslt7T6Nhk24uTq04dQxXBVu1XlWKLAVOo7xyj33ORiCKS70ZZ1orVLhnEHj75j9SdQkeBPNE8680T/pub?gid=0&single=true&output=csv";
+  const CUANTAS_MOSTRAR = 15;
+  const REFRESCAR_CADA_MS = 5 * 60 * 1000;
+
+  // ============ 2) LEER EL CSV ============
+  // Cada noticia es una línea y las columnas van separadas por comas.
+  // Los títulos pueden traer comas adentro (van entre comillas), por eso no alcanza con cortar por ",".
+  function leerCSV(texto) {
+    const filas = [];
+    let fila = [], celda = "", entreComillas = false;
+    for (let i = 0; i < texto.length; i++) {
+      const c = texto[i];
+      if (entreComillas) {
+        if (c === '"' && texto[i + 1] === '"') { celda += '"'; i++; }
+        else if (c === '"') entreComillas = false;
+        else celda += c;
+      } else if (c === '"') entreComillas = true;
+      else if (c === ",") { fila.push(celda); celda = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && texto[i + 1] === "\n") i++;
+        fila.push(celda); filas.push(fila); fila = []; celda = "";
+      } else celda += c;
+    }
+    if (celda !== "" || fila.length) { fila.push(celda); filas.push(fila); }
+
+    const [encabezado, ...datos] = filas;
+    return datos
+      .filter(f => f.some(x => x.trim() !== ""))
+      .map(f => Object.fromEntries(encabezado.map((nombre, i) => [nombre.trim(), (f[i] || "").trim()])));
+  }
+
+  // ============ 3) PREPARAR CADA NOTICIA ============
+  // Si la fila no trae "fuente", la sacamos del final del título ("Texto - Diario").
+  function separarTitulo(noticia) {
+    if (noticia.fuente) return { texto: noticia.titulo, fuente: noticia.fuente };
+    const pos = noticia.titulo.lastIndexOf(" - ");
+    if (pos === -1) return { texto: noticia.titulo, fuente: "Noticia" };
+    return { texto: noticia.titulo.slice(0, pos), fuente: noticia.titulo.slice(pos + 3) };
+  }
+
+  function haceCuanto(iso) {
+    const fecha = new Date(iso);
+    if (isNaN(fecha)) return "";
+    const min = Math.round((Date.now() - fecha) / 60000);
+    if (min < 1) return "Recién";
+    if (min < 60) return "Hace " + min + " min";
+    const horas = Math.round(min / 60);
+    if (horas < 24) return "Hace " + horas + " h";
+    const dias = Math.round(horas / 24);
+    if (dias < 7) return "Hace " + dias + (dias === 1 ? " día" : " días");
+    return fecha.toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+  }
+
+  // ============ 4) DIBUJAR LAS TARJETAS ============
+  const grilla = document.getElementById("grilla");
+  const contChips = document.getElementById("chips");
+  const btnActualizar = document.getElementById("btn-actualizar");
+
+  // Categorías de los filtros. Se deciden buscando palabras en el título y el resumen,
+  // así que son aproximadas: una noticia que no encaja en ninguna aparece solo en "Todo".
+  const CATEGORIAS = [
+    { id: "todo", nombre: "Todo", palabras: null },
+    { id: "musica", nombre: "Música", palabras: /m[uú]sica|canci[oó]n|[aá]lbum|disco|sencillo|single|videoclip|clip|tema nuevo|nuevo tema|lanz[oó]|estren/i },
+    { id: "gira", nombre: "Gira Futttura", palabras: /futttura|futtura|gira|tour|concierto|recital|show|estadio|entradas|festival/i },
+    { id: "looks", nombre: "Looks", palabras: /look|outfit|vestido|moda|campa[nñ]a|bikini|pos[oó]|posar|modelo|estilo|vestuario/i },
+    { id: "colab", nombre: "Colaboraciones", palabras: /colabor|feat|\bft\b|d[uú]o|dueto|junto a|sesi[oó]n con/i }
+  ];
+
+  // Medio cuya nota más nueva va siempre arriba y grande. Escribí el nombre tal cual aparece
+  // en la tarjeta (por ejemplo "Pronto"). Si lo dejás vacío ("") se desactiva.
+  const FUENTE_DESTACADA = "Pronto";
+
+  let todas = [];                 // todas las noticias leídas de la hoja
+  let filtro = "todo";            // el chip elegido
+  const vistas = new Set();       // links que ya se mostraron alguna vez
+  const nuevas = new Set();       // links que aparecieron después de la primera carga
+  let primeraCarga = true;
+  let temporizador = null;
+
+  function coincide(noticia, idCategoria) {
+    const cat = CATEGORIAS.find(c => c.id === idCategoria);
+    if (!cat || !cat.palabras) return true;
+    return cat.palabras.test(noticia.titulo + " " + (noticia.resumen || ""));
+  }
+
+  function mostrarMensaje(texto) {
+    grilla.replaceChildren();
+    const m = document.createElement("div");
+    m.className = "mensaje pixel";
+    m.textContent = texto;
+    grilla.appendChild(m);
+  }
+
+  function crearMarca() {
+    const m = document.createElement("img");
+    m.className = "marca";
+    m.src = "assets/logo-t.png";
+    m.alt = "";
+    return m;
+  }
+
+  function crearTarjeta(noticia, indice, animar) {
+    const { texto, fuente } = separarTitulo(noticia);
+    const esNueva = nuevas.has(noticia.link);
+    const a = document.createElement("a");
+    a.className = "tarjeta" + (indice === 0 ? " destacada" : "") + (animar || esNueva ? "" : " sin-anim");
+    if (animar) a.style.animationDelay = (indice * 60) + "ms";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.href = /^https?:\/\//i.test(noticia.link) ? noticia.link : "#";
+
+    // Foto de la noticia dentro de un marco. Si no hay (o no carga), queda el logo de marca de agua.
+    // A la dirección de la foto le sacamos el tamaño fijo (&h=...&c=...) porque Bing la
+    // achicaba y la rellenaba con franjas blancas.
+    const cuadro = document.createElement("div");
+    cuadro.className = "cuadro-foto";
+    const urlFoto = (noticia.imagen || "")
+      .replace(/^http:\/\//i, "https://")
+      .replace(/&h=\d+/i, "")
+      .replace(/&c=\d+/i, "");
+    if (/^https:\/\//i.test(urlFoto)) {
+      const foto = document.createElement("img");
+      foto.className = "foto";
+      foto.alt = "";
+      foto.loading = "lazy";
+      foto.referrerPolicy = "no-referrer";
+      foto.src = urlFoto;
+      foto.addEventListener("error", () => { foto.remove(); cuadro.appendChild(crearMarca()); });
+      cuadro.appendChild(foto);
+    } else {
+      cuadro.appendChild(crearMarca());
+    }
+
+    if (esNueva) {
+      const etiqueta = document.createElement("span");
+      etiqueta.className = "etiqueta-nueva pixel";
+      etiqueta.textContent = "Nueva";
+      cuadro.appendChild(etiqueta);
+    }
+    a.appendChild(cuadro);
+
+    const vidrio = document.createElement("div");
+    vidrio.className = "vidrio";
+
+    const f = document.createElement("span");
+    f.className = "fuente pixel";
+    f.textContent = fuente;
+    const h = document.createElement("h2");
+    h.textContent = texto;
+    vidrio.append(f, h);
+
+    // Resumen corto (si la hoja tiene la columna "resumen")
+    if (noticia.resumen) {
+      const r = document.createElement("p");
+      r.className = "resumen";
+      r.textContent = noticia.resumen;
+      vidrio.appendChild(r);
+    }
+
+    const pie = document.createElement("div");
+    pie.className = "pie pixel";
+    const cuando = document.createElement("span");
+    cuando.className = "hora";
+    cuando.dataset.fecha = noticia.fecha;
+    cuando.textContent = haceCuanto(noticia.fecha);
+    const boton = document.createElement("span");
+    boton.className = "boton";
+    boton.textContent = "Leer nota";
+    pie.append(cuando, boton);
+
+    vidrio.appendChild(pie);
+    a.appendChild(vidrio);
+    return a;
+  }
+
+  // animarTodas = true: entran todas con retraso escalonado (primera carga o al cambiar de filtro).
+  // false: en una actualización solo se animan las noticias nuevas; las demás quedan quietas.
+  function dibujar(animarTodas) {
+    const lista = todas.filter(n => coincide(n, filtro)).slice(0, CUANTAS_MOSTRAR);
+
+    // La nota más nueva de FUENTE_DESTACADA pasa al primer lugar (la grande) y la que estaba
+    // primera ocupa el lugar que dejó. Si no hay ninguna de esa fuente, no cambia nada.
+    if (FUENTE_DESTACADA) {
+      const k = lista.findIndex(n => (n.fuente || "").toLowerCase() === FUENTE_DESTACADA.toLowerCase());
+      if (k > 0) [lista[0], lista[k]] = [lista[k], lista[0]];
+    }
+
+    if (!lista.length) {
+      mostrarMensaje(todas.length ? "No hay noticias de esta categoría por ahora" : "Todavía no hay noticias");
+      return;
+    }
+    grilla.replaceChildren(...lista.map((n, i) => crearTarjeta(n, i, animarTodas)));
+  }
+
+  function dibujarChips() {
+    contChips.replaceChildren(...CATEGORIAS.map(cat => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip pixel";
+      b.textContent = cat.nombre;
+      b.setAttribute("aria-pressed", String(cat.id === filtro));
+      b.addEventListener("click", () => { filtro = cat.id; dibujarChips(); dibujar(true); });
+      return b;
+    }));
+  }
+
+  // El "hace 12 min" se refresca solo cada minuto
+  function actualizarHoras() {
+    document.querySelectorAll(".hora").forEach(el => { el.textContent = haceCuanto(el.dataset.fecha); });
+  }
+  setInterval(actualizarHoras, 60 * 1000);
+
+  function programar(ms) {
+    clearTimeout(temporizador);
+    temporizador = setTimeout(cargar, ms);
+  }
+
+  async function cargar() {
+    clearTimeout(temporizador);
+    btnActualizar.disabled = true;
+    btnActualizar.textContent = "Actualizando…";
+    try {
+      const respuesta = await fetch(URL_HOJA, { cache: "no-store" });
+      if (!respuesta.ok) throw new Error("Respuesta " + respuesta.status);
+      const filas = leerCSV(await respuesta.text())
+        .filter(n => n.titulo && n.link)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0, 60);
+
+      // Las noticias que no estaban en la carga anterior se marcan como "Nueva"
+      if (!primeraCarga) filas.forEach(n => { if (!vistas.has(n.link)) nuevas.add(n.link); });
+      filas.forEach(n => vistas.add(n.link));
+      todas = filas;
+
+      dibujar(primeraCarga);
+      primeraCarga = false;
+
+      document.getElementById("estado-texto").textContent = "Noticias al día";
+      document.getElementById("estado-hora").textContent =
+        "Última actualización: " + new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+      programar(REFRESCAR_CADA_MS);
+    } catch (error) {
+      console.error(error);
+      document.getElementById("estado-texto").textContent = "Sin conexión · reintentando…";
+      // Si ya había noticias en pantalla, se quedan; si no, mensaje amable
+      if (!todas.length) mostrarMensaje("No pudimos cargar las noticias. Vamos a reintentar solas en unos segundos.");
+      programar(30 * 1000);
+    } finally {
+      btnActualizar.disabled = false;
+      btnActualizar.textContent = "Actualizar ahora";
+    }
+  }
+
+  btnActualizar.addEventListener("click", cargar);
+  dibujarChips();
+  cargar();
+
+  // ============ 5) EL CIELO DE ESTRELLAS ============
+  (function () {
+    const lienzo = document.getElementById("estrellas");
+    const ctx = lienzo.getContext("2d");
+    let estrellas = [];
+
+    function armar() {
+      lienzo.width = innerWidth;
+      lienzo.height = innerHeight;
+      const cantidad = Math.min(220, Math.floor(innerWidth * innerHeight / 7000));
+      estrellas = Array.from({ length: cantidad }, () => ({
+        x: Math.random() * lienzo.width,
+        y: Math.random() * lienzo.height,
+        r: Math.random() * 1.3 + .2,
+        lila: Math.random() < .2,
+        fase: Math.random() * Math.PI * 2,
+        vel: Math.random() * .02 + .005
+      }));
+    }
+
+    function dibujar() {
+      ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+      for (const e of estrellas) {
+        e.fase += e.vel;
+        ctx.globalAlpha = .35 + .65 * Math.abs(Math.sin(e.fase));
+        ctx.fillStyle = e.lila ? "#d9a8ff" : "#e8f6ff";
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(dibujar);
+    }
+
+    addEventListener("resize", armar);
+    armar();
+    dibujar();
+  })();
+</script>
+</body>
+</html>
